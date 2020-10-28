@@ -13,7 +13,7 @@ class FontUtil {
               TextSpan(
                   text: 'da',
                   style: const TextStyle(
-                      fontFamily: "Fontdiner Swanky", color: Colors.black, fontSize: 20)),
+                      fontFamily: "Fontdiner Swanky", color: Colors.white, fontSize: 20)),
             ]));
   }
 
