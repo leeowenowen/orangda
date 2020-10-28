@@ -46,17 +46,17 @@ android {
 
     signingConfigs {
         release {
-            keyAlias "oranda"
-            keyPassword "oranda"
-            storeFile file("/Users/wangli/Ratel/oranda-release.jks")
-            storePassword "oranda"
+            keyAlias "orangda"
+            keyPassword "orangda"
+            storeFile file("/Users/wangli/Ratel/orangda-release.jks")
+            storePassword "orangda"
         }
 
         debug {
-            keyAlias "oranda"
-            keyPassword "oranda"
-            storeFile file("/Users/wangli/Ratel/oranda-release.jks")
-            storePassword "oranda"
+            keyAlias "orangda"
+            keyPassword "orangda"
+            storeFile file("/Users/wangli/Ratel/orangda-release.jks")
+            storePassword "orangda"
         }
     }
 
