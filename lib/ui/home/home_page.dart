@@ -9,6 +9,7 @@ import 'package:orangda/ui/account/login_page.dart';
 import 'package:orangda/ui/activity/activity_page.dart';
 import 'package:orangda/ui/demo/variable_size_demo.dart';
 import 'package:orangda/ui/widgets/fancy_bottom_navigation.dart';
+import 'package:orangda_photo_selector/photo_selector_view.dart';
 
 import '../../main.dart';
 import '../post_feed/post_feed_page.dart';
@@ -61,16 +62,16 @@ class _HomePageState extends State<HomePage> {
         currentUserModel == null)
         ? LoginPage()
         : Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: FontUtil.makeTitleByString(_getPageTitle()),
-        centerTitle: true,
-        elevation: 0,
-        bottom: new PreferredSize(
-            child: new Container(
-                color: Color(0xffdddddd),
-                height: 0.5,
-      ),),),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   title: FontUtil.makeTitleByString(_getPageTitle()),
+      //   centerTitle: true,
+      //   elevation: 0,
+      //   bottom: new PreferredSize(
+      //       child: new Container(
+      //           color: Color(0xffdddddd),
+      //           height: 0.5,
+      // ),),),
       body: Container(
         child: PageView(
           children: [
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> {
             // Container(color: Colors.white, child: ActivityPage()),
             Container(
               color: Colors.white,
-              child: Uploader(),
+              child: PhotoSelectorView(),
             ),
             // Container(
             //   color: Colors.white,

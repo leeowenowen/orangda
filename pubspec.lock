@@ -441,6 +441,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.0"
+  orangda_photo_selector:
+    dependency: "direct main"
+    description:
+      path: "plugins/orangda_photo_selector"
+      relative: true
+    source: path
+    version: "0.0.1"
   package_info:
     dependency: "direct main"
     description:

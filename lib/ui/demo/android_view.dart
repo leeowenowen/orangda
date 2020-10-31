@@ -6,9 +6,9 @@ class MyAndroidView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: AndroidView(
-        viewType: 'myandroidview',
-        creationParams: {'text': 'Flutter传给Android的参数'},
-        creationParamsCodec: StandardMessageCodec(),
+        viewType: 'com.orangda.post_page.PostPage',
+        // creationParams: {'text': 'Flutter传给Android的参数'},
+        // creationParamsCodec: StandardMessageCodec(),
       ),
     );
   }
