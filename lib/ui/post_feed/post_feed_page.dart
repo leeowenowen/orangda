@@ -51,6 +51,7 @@ class _PostFeedPageState extends State<PostFeedPage> {
         armedDragUpCancel: false,
         onRefresh: onRefresh,
         child: Container(
+
           child: LoadingMoreCustomScrollView(
             slivers: <Widget>[
               SliverToBoxAdapter(

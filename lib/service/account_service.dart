@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,16 +10,16 @@ import '../main.dart';
 import '../ui/account/set_account_info_page.dart';
 
 class AccountService {
-  static FirebaseAuth _auth;
+  static auth.FirebaseAuth _auth;
   static GoogleSignIn _googleSignIn;
   static User _currentUserModel;
 
   static init() {
-    _auth = FirebaseAuth.instance;
+    _auth = auth.FirebaseAuth.instance;
     _googleSignIn = GoogleSignIn();
   }
 
-  static FirebaseAuth firebaseAuth() {
+  static auth.FirebaseAuth firebaseAuth() {
     return _auth;
   }
 
@@ -51,12 +51,12 @@ class AccountService {
       await tryCreateUserRecord(context);
     }
 
-    if (await _auth.currentUser() == null) {
+    if (await _auth.currentUser == null) {
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
+      final auth.AuthCredential credential = auth.GoogleAuthProvider.getCredential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
@@ -76,12 +76,12 @@ class AccountService {
       await tryCreateUserRecord(context);
     }
 
-    if (await _auth.currentUser() == null && user != null) {
+    if (await _auth.currentUser == null && user != null) {
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
+      final auth.AuthCredential credential = auth.GoogleAuthProvider.getCredential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );

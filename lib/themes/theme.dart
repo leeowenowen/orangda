@@ -6,20 +6,25 @@ class AppTheme {
   static ThemeData theme = ThemeData(
     // Define the default brightness and colors.
 
-    brightness: Brightness.light,
-    primaryColor: Colors.white,
-    accentColor: Colors.black87,
-    colorScheme: ColorScheme.light(primary: Colors.white),
+    primaryColor: Colors.black,
+    dividerColor: Colors.black,
+    shadowColor: Colors.black,
+    canvasColor: Colors.black,
 
+    accentColor: Colors.black87,
     fontFamily: 'Roboto',
+
+
 
     // Define the default TextTheme. Use this to specify the default
     // text styling for headlines, titles, bodies of text, and more.
     textTheme: TextTheme(
       headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
       headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-      bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+      bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind',color: Colors.white),
       button: TextStyle(fontSize: 15, color: Colors.white),
+      bodyText1: TextStyle(color: Colors.white),
+
     ),
 
     iconTheme: IconThemeData(color: MyColors.PRIMARY),
@@ -90,7 +95,9 @@ class AppTheme {
 }
 
 class MyColors {
-  static const Color BACKGROUND = Color(0xFFFAFAFA);
+  static const Color BACKGROUND = Colors.black;
+  static const Color HIGHLIGHT_COLOR =  Colors.deepOrange;
+  static const Color MAIN_TEXT_COLOR = Colors.white70;
   // static const Color PRIMARY = Color(0xFFFF4158);
   static const Color PRIMARY = Colors.white;
   static const Color SECONDARY_COLOR = Color(0xff08CFCE);

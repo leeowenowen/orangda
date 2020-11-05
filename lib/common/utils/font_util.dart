@@ -28,7 +28,7 @@ class FontUtil {
               TextSpan(
                   text: 'da',
                   style: const TextStyle(
-                      fontFamily: "Fontdiner Swanky", color: Colors.black, fontSize: 35)),
+                      fontFamily: "Fontdiner Swanky", color: Colors.white, fontSize: 35)),
             ]));
   }
 

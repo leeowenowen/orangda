@@ -8,6 +8,7 @@ import 'package:orangda/common/constants/constants.dart';
 import 'package:orangda/common/utils/time_util.dart';
 import 'package:orangda/models/user.dart';
 import 'package:orangda/service/account_service.dart';
+import 'package:orangda/themes/theme.dart';
 import 'package:orangda/ui/account/profile_page.dart';
 import 'package:orangda/ui/comment/comment_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -32,7 +33,7 @@ class ImagePost extends StatefulWidget {
       mediaUrl: document['mediaUrl'],
       likes: document['likes'],
       description: document['description'],
-      postId: document.documentID,
+      postId: document.id,
       ownerId: document['ownerId'],
       postTime: formatTimestamp(timestampmillSeconds)
     );
@@ -104,11 +105,11 @@ class _ImagePost extends State<ImagePost> {
   bool showHeart = false;
 
   TextStyle boldStyle = TextStyle(
-    color: Colors.black,
+    color: Colors.white,
     fontWeight: FontWeight.bold,
   );
 
-  var reference = Firestore.instance.collection(Constants.COLLECTION_POSTS);
+  var reference = FirebaseFirestore.instance.collection(Constants.COLLECTION_POSTS);
 
   _ImagePost(
       {this.mediaUrl,
@@ -176,26 +177,27 @@ class _ImagePost extends State<ImagePost> {
 
   buildPostHeader({String ownerId}) {
     if (ownerId == null) {
-      return Text("owner error");
+      return Text("Someone", style: TextStyle(color:MyColors.MAIN_TEXT_COLOR));
     }
 
     return FutureBuilder(
-        future: Firestore.instance
+        future: FirebaseFirestore.instance
             .collection(Constants.COLLECTION_USER)
-            .document(ownerId)
+            .doc(ownerId)
             .get(),
         builder: (context, snapshot) {
           if (snapshot.data != null) {
+            var data = snapshot.data.data();
             return Container(
               height: 70,
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundImage: CachedNetworkImageProvider(
-                      snapshot.data.data['photoUrl']),
+                      data['photoUrl']),
                   backgroundColor: Colors.grey,
                 ),
                 title: GestureDetector(
-                  child: Text(snapshot.data.data['username'], style: boldStyle),
+                  child: Text(data['username'],  style: TextStyle(color:MyColors.MAIN_TEXT_COLOR, fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.of(context).pushNamed(ProfilePage.ROUTE, arguments: {
                       'userId':ownerId
@@ -209,7 +211,7 @@ class _ImagePost extends State<ImagePost> {
                   child: Icon(Icons.location_on),
                 ),
 
-                Text(this.location),]
+                Text(this.location, style: TextStyle(color:MyColors.MAIN_TEXT_COLOR)),]
                 ),
                 trailing: const Icon(Icons.more_vert),
               ),
@@ -230,10 +232,13 @@ class _ImagePost extends State<ImagePost> {
 
   @override
   Widget build(BuildContext context) {
-    liked = (likes[AccountService.googleSignIn().currentUser.id.toString()] ==
-        true);
+    liked = false;
+    // (likes[AccountService.googleSignIn().currentUser.id.toString()] ==
+    //     true);
 
-    return Column(
+    return Container(
+      color:MyColors.BACKGROUND,
+        child:Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         buildPostHeader(ownerId: ownerId),
@@ -245,7 +250,7 @@ class _ImagePost extends State<ImagePost> {
                 child: Text(
                   description,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: MyColors.MAIN_TEXT_COLOR,
                     fontSize: 15,
                   )
                 )),
@@ -296,7 +301,7 @@ class _ImagePost extends State<ImagePost> {
           ],
         ),
       ],
-    );
+    ));
   }
 
   void _likePost(String postId2) {
@@ -305,7 +310,7 @@ class _ImagePost extends State<ImagePost> {
 
     if (_liked) {
       print('removing like');
-      reference.document(postId).updateData({
+      reference.doc(postId).update({
         'likes.$userId': false
         //firestore plugin doesnt support deleting, so it must be nulled / falsed
       });
@@ -321,7 +326,7 @@ class _ImagePost extends State<ImagePost> {
 
     if (!_liked) {
       print('liking');
-      reference.document(postId).updateData({'likes.$userId': true});
+      reference.doc(postId).update({'likes.$userId': true});
 
       addActivityFeedItem();
 
@@ -341,12 +346,12 @@ class _ImagePost extends State<ImagePost> {
 
   void addActivityFeedItem() {
     User currentUserModel = AccountService.currentUser();
-    Firestore.instance
+    FirebaseFirestore.instance
         .collection(Constants.COLLECTION_FEED)
-        .document(ownerId)
+        .doc(ownerId)
         .collection("items")
-        .document(postId)
-        .setData({
+        .doc(postId)
+        .set({
       "username": currentUserModel.username,
       "userId": currentUserModel.id,
       "type": "like",
@@ -358,11 +363,11 @@ class _ImagePost extends State<ImagePost> {
   }
 
   void removeActivityFeedItem() {
-    Firestore.instance
+    FirebaseFirestore.instance
         .collection(Constants.COLLECTION_FEED)
-        .document(ownerId)
+        .doc(ownerId)
         .collection("items")
-        .document(postId)
+        .doc(postId)
         .delete();
   }
 }
@@ -373,9 +378,9 @@ class ImagePostFromId extends StatelessWidget {
   const ImagePostFromId({this.id});
 
   getImagePost() async {
-    var document = await Firestore.instance
+    var document = await FirebaseFirestore.instance
         .collection(Constants.COLLECTION_POSTS)
-        .document(id)
+        .doc(id)
         .get();
     return ImagePost.fromDocument(document);
   }
