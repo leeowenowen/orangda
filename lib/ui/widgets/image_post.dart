@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:orangda/common/constants/constants.dart';
 import 'package:orangda/common/utils/time_util.dart';
 import 'package:orangda/models/user.dart';
@@ -11,7 +12,6 @@ import 'package:orangda/service/account_service.dart';
 import 'package:orangda/themes/theme.dart';
 import 'package:orangda/ui/account/profile_page.dart';
 import 'package:orangda/ui/comment/comment_page.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ImagePost extends StatefulWidget {
   const ImagePost(
@@ -28,15 +28,14 @@ class ImagePost extends StatefulWidget {
     Timestamp timestamp = document['timestamp'];
     int timestampmillSeconds = timestamp.millisecondsSinceEpoch;
     return ImagePost(
-      username: document['username'],
-      location: document['location'],
-      mediaUrl: document['mediaUrl'],
-      likes: document['likes'],
-      description: document['description'],
-      postId: document.id,
-      ownerId: document['ownerId'],
-      postTime: formatTimestamp(timestampmillSeconds)
-    );
+        username: document['username'],
+        location: document['location'],
+        mediaUrl: document['mediaUrl'],
+        likes: document['likes'],
+        description: document['description'],
+        postId: document.id,
+        ownerId: document['ownerId'],
+        postTime: formatTimestamp(timestampmillSeconds));
   }
 
   factory ImagePost.fromJSON(Map data) {
@@ -86,7 +85,7 @@ class ImagePost extends StatefulWidget {
         likeCount: getLikeCount(this.likes),
         ownerId: this.ownerId,
         postId: this.postId,
-    postTime: this.postTime,
+        postTime: this.postTime,
       );
 }
 
@@ -109,7 +108,8 @@ class _ImagePost extends State<ImagePost> {
     fontWeight: FontWeight.bold,
   );
 
-  var reference = FirebaseFirestore.instance.collection(Constants.COLLECTION_POSTS);
+  var reference =
+      FirebaseFirestore.instance.collection(Constants.COLLECTION_POSTS);
 
   _ImagePost(
       {this.mediaUrl,
@@ -177,7 +177,7 @@ class _ImagePost extends State<ImagePost> {
 
   buildPostHeader({String ownerId}) {
     if (ownerId == null) {
-      return Text("Someone", style: TextStyle(color:MyColors.MAIN_TEXT_COLOR));
+      return Text("Someone", style: TextStyle(color: MyColors.MAIN_TEXT_COLOR));
     }
 
     return FutureBuilder(
@@ -189,30 +189,29 @@ class _ImagePost extends State<ImagePost> {
           if (snapshot.data != null) {
             var data = snapshot.data.data();
             return Container(
-              height: 70,
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: CachedNetworkImageProvider(
-                      data['photoUrl']),
+                  backgroundImage: CachedNetworkImageProvider(data['photoUrl']),
                   backgroundColor: Colors.grey,
                 ),
                 title: GestureDetector(
-                  child: Text(data['username'],  style: TextStyle(color:MyColors.MAIN_TEXT_COLOR, fontWeight: FontWeight.bold)),
+                  child: Text(data['username'],
+                      style: TextStyle(
+                          color: MyColors.MAIN_TEXT_COLOR,
+                          fontWeight: FontWeight.bold)),
                   onTap: () {
-                    Navigator.of(context).pushNamed(ProfilePage.ROUTE, arguments: {
-                      'userId':ownerId
-                    });
+                    Navigator.of(context).pushNamed(ProfilePage.ROUTE,
+                        arguments: {'userId': ownerId});
                   },
                 ),
-                subtitle: Row(children:[IconTheme(
-                  data: IconThemeData(
-                      size: 15,
-                      color: Colors.blue),
-                  child: Icon(Icons.location_on),
-                ),
-
-                Text(this.location, style: TextStyle(color:MyColors.MAIN_TEXT_COLOR)),]
-                ),
+                subtitle: Row(children: [
+                  IconTheme(
+                    data: IconThemeData(size: 15, color: Colors.blue),
+                    child: Icon(Icons.location_on),
+                  ),
+                  Text(this.location,
+                      style: TextStyle(color: MyColors.MAIN_TEXT_COLOR)),
+                ]),
                 trailing: const Icon(Icons.more_vert),
               ),
             );
@@ -220,7 +219,28 @@ class _ImagePost extends State<ImagePost> {
 
           // snapshot data is null here
           return Container(
-            height: 70,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.grey,
+              ),
+              title: GestureDetector(
+                child: Text('Someone',
+                    style: TextStyle(
+                        color: MyColors.MAIN_TEXT_COLOR,
+                        fontWeight: FontWeight.bold)),
+                onTap: () {
+                  Navigator.of(context).pushNamed(ProfilePage.ROUTE,
+                      arguments: {'userId': ownerId});
+                },
+              ),
+              subtitle: Row(children: [
+                IconTheme(
+                  data: IconThemeData(size: 15, color: Colors.blue),
+                  child: Icon(Icons.location_on),
+                ),
+              ]),
+              trailing: const Icon(Icons.more_vert),
+            ),
           );
         });
   }
@@ -230,6 +250,67 @@ class _ImagePost extends State<ImagePost> {
     child: Center(child: CircularProgressIndicator()),
   );
 
+  Widget buildDesc(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+            margin: const EdgeInsets.only(left: 20.0, right: 20, bottom: 5),
+            child: Text(description,
+                style: TextStyle(
+                  color: MyColors.MAIN_TEXT_COLOR,
+                  fontSize: 15,
+                ))),
+      ],
+    );
+  }
+
+  Widget buildComment(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Padding(padding: const EdgeInsets.only(left: 20.0, top: 40.0)),
+        buildLikeIcon(),
+        Padding(padding: const EdgeInsets.only(right: 20.0)),
+        GestureDetector(
+            child: const Icon(
+              FontAwesomeIcons.comment,
+              size: 25.0,
+            ),
+            onTap: () {
+              goToComments(
+                  context: context,
+                  postId: postId,
+                  ownerId: ownerId,
+                  mediaUrl: mediaUrl);
+            }),
+        Expanded(
+            child: Container(
+                margin: EdgeInsets.only(right: 20),
+                child: Text(postTime,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(color: Colors.grey, fontSize: 12))))
+      ],
+    );
+  }
+
+  Widget buildLikeCount(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Container(
+          margin: const EdgeInsets.only(left: 20.0),
+          child: Text(
+            "$likeCount likes",
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey,
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     liked = false;
@@ -237,71 +318,17 @@ class _ImagePost extends State<ImagePost> {
     //     true);
 
     return Container(
-      color:MyColors.BACKGROUND,
-        child:Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        buildPostHeader(ownerId: ownerId),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        color: MyColors.BACKGROUND,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Container(
-                margin: const EdgeInsets.only(left: 20.0,right: 20, bottom: 5),
-                child: Text(
-                  description,
-                  style: TextStyle(
-                    color: MyColors.MAIN_TEXT_COLOR,
-                    fontSize: 15,
-                  )
-                )),
+            buildPostHeader(ownerId: ownerId),
+            buildDesc(context),
+            buildLikeableImage(),
+            buildComment(context),
+            buildLikeCount(context)
           ],
-        ),
-        buildLikeableImage(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(padding: const EdgeInsets.only(left: 20.0, top: 40.0)),
-            buildLikeIcon(),
-            Padding(padding: const EdgeInsets.only(right: 20.0)),
-            GestureDetector(
-                child: const Icon(
-                  FontAwesomeIcons.comment,
-                  size: 25.0,
-                ),
-                onTap: () {
-                  goToComments(
-                      context: context,
-                      postId: postId,
-                      ownerId: ownerId,
-                      mediaUrl: mediaUrl);
-                }),
-            Expanded(child:
-            Container(
-              margin:EdgeInsets.only(right: 20),
-                child:Text(postTime,
-                    textAlign: TextAlign.right,
-                    style:TextStyle(
-                  color:Colors.grey,
-                  fontSize:12
-                ))))
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(left: 20.0),
-              child: Text(
-                "$likeCount likes",
-                style: TextStyle(
-                  fontSize: 12,
-                  color:Colors.grey,
-                ),
-              ),
-            )
-          ],
-        ),
-      ],
-    ));
+        ));
   }
 
   void _likePost(String postId2) {

@@ -25,7 +25,12 @@ class _Feed extends State<Feed> {
     return Scaffold(
         backgroundColor: MyColors.BACKGROUND,
         appBar: AppBar(
-          title: FontUtil.makeTitle(),
+          title: Row(
+              mainAxisAlignment:MainAxisAlignment.center,
+              children:[
+              Image.asset('assets/logo.png', width: 40,),
+              FontUtil.makeTitle(),]
+          ),
           centerTitle: true,
         ),
         body: _buildFeed());
@@ -35,18 +40,27 @@ class _Feed extends State<Feed> {
     return StreamBuilder<QuerySnapshot>(
       stream: _fetchPosts(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data.size > 0) {
-          return ListView.builder(
+        if (snapshot.hasData && snapshot.data.size > 4) {
+          return ListView.separated(
               shrinkWrap: true,
               physics: BouncingScrollPhysics(),
               itemCount: snapshot.data.docs.length,
+              separatorBuilder: (context, index) {
+                return Container(height: 0,color: Colors.red,);
+              },
               itemBuilder: (context, index) {
                 var doc = snapshot.data.docs[index];
                 final ImagePost imagePost = ImagePost.fromDocument(doc);
                 return imagePost;
+                // return Container(height: 300,color: Colors.black,);
+
               });
+
         }
-        return Center(child: CircularProgressIndicator());
+        // return Container(height: 300,color: Colors.black,);
+        return Center(child: CircularProgressIndicator(
+            backgroundColor:Colors.red,
+        ));
       },
     );
   }
