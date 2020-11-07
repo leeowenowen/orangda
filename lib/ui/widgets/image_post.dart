@@ -2,131 +2,42 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:orangda/common/constants/constants.dart';
-import 'package:orangda/common/utils/time_util.dart';
-import 'package:orangda/models/user.dart';
+import 'package:orangda/models/feed/feed_model.dart';
+import 'package:orangda/models/post/post.dart';
+import 'package:orangda/models/post/post_model.dart';
+import 'package:orangda/models/user/user_model.dart';
 import 'package:orangda/service/account_service.dart';
 import 'package:orangda/themes/theme.dart';
 import 'package:orangda/ui/account/profile_page.dart';
 import 'package:orangda/ui/comment/comment_page.dart';
 
 class ImagePost extends StatefulWidget {
-  const ImagePost(
-      {this.mediaUrl,
-      this.username,
-      this.location,
-      this.description,
-      this.likes,
-      this.postId,
-      this.ownerId,
-      this.postTime});
+  final Post post;
 
-  factory ImagePost.fromDocument(DocumentSnapshot document) {
-    Timestamp timestamp = document['timestamp'];
-    int timestampmillSeconds = timestamp.millisecondsSinceEpoch;
-    return ImagePost(
-        username: document['username'],
-        location: document['location'],
-        mediaUrl: document['mediaUrl'],
-        likes: document['likes'],
-        description: document['description'],
-        postId: document.id,
-        ownerId: document['ownerId'],
-        postTime: formatTimestamp(timestampmillSeconds));
-  }
-
-  factory ImagePost.fromJSON(Map data) {
-    return ImagePost(
-      username: data['username'],
-      location: data['location'],
-      mediaUrl: data['mediaUrl'],
-      likes: data['likes'],
-      description: data['description'],
-      ownerId: data['ownerId'],
-      postId: data['postId'],
-      postTime: data['timestamp'],
-    );
-  }
-
-  int getLikeCount(var likes) {
-    if (likes == null) {
-      return 0;
-    }
-// issue is below
-    var vals = likes.values;
-    int count = 0;
-    for (var val in vals) {
-      if (val == true) {
-        count = count + 1;
-      }
-    }
-
-    return count;
-  }
-
-  final String mediaUrl;
-  final String username;
-  final String location;
-  final String description;
-  final likes;
-  final String postId;
-  final String ownerId;
-  final String postTime;
+  const ImagePost(this.post);
 
   _ImagePost createState() => _ImagePost(
-        mediaUrl: this.mediaUrl,
-        username: this.username,
-        location: this.location,
-        description: this.description,
-        likes: this.likes,
-        likeCount: getLikeCount(this.likes),
-        ownerId: this.ownerId,
-        postId: this.postId,
-        postTime: this.postTime,
+        this.post,
       );
 }
 
 class _ImagePost extends State<ImagePost> {
-  final String mediaUrl;
-  final String username;
-  final String location;
-  final String description;
-  Map likes;
-  int likeCount;
-  final String postId;
-  bool liked;
-  final String ownerId;
-  final String postTime;
-
+  final Post post;
   bool showHeart = false;
-
-  TextStyle boldStyle = TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.bold,
-  );
-
   var reference =
-      FirebaseFirestore.instance.collection(Constants.COLLECTION_POSTS);
+      FirebaseFirestore.instance.collection(Constants.COLLECTION_POST);
 
-  _ImagePost(
-      {this.mediaUrl,
-      this.username,
-      this.location,
-      this.description,
-      this.likes,
-      this.postId,
-      this.likeCount,
-      this.ownerId,
-      this.postTime});
+  _ImagePost(this.post);
 
   GestureDetector buildLikeIcon() {
     Color color;
     IconData icon;
-
-    if (liked) {
+    if (liked()) {
       color = Colors.pink;
       icon = FontAwesomeIcons.solidHeart;
     } else {
@@ -140,18 +51,18 @@ class _ImagePost extends State<ImagePost> {
           color: color,
         ),
         onTap: () {
-          _likePost(postId);
+          _likePost(post.postId);
         });
   }
 
   GestureDetector buildLikeableImage() {
     return GestureDetector(
-      onDoubleTap: () => _likePost(postId),
+      onDoubleTap: () => _likePost(post.postId),
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           CachedNetworkImage(
-            imageUrl: mediaUrl,
+            imageUrl: post.mediaUrl,
             fit: BoxFit.fitWidth,
             placeholder: (context, url) => loadingPlaceHolder,
             errorWidget: (context, url, error) => Icon(Icons.error),
@@ -181,10 +92,7 @@ class _ImagePost extends State<ImagePost> {
     }
 
     return FutureBuilder(
-        future: FirebaseFirestore.instance
-            .collection(Constants.COLLECTION_USER)
-            .doc(ownerId)
-            .get(),
+        future: UserModel.getUserById(ownerId),
         builder: (context, snapshot) {
           if (snapshot.data != null) {
             var data = snapshot.data.data();
@@ -209,7 +117,7 @@ class _ImagePost extends State<ImagePost> {
                     data: IconThemeData(size: 15, color: Colors.blue),
                     child: Icon(Icons.location_on),
                   ),
-                  Text(this.location,
+                  Text(this.post.location,
                       style: TextStyle(color: MyColors.MAIN_TEXT_COLOR)),
                 ]),
                 trailing: const Icon(Icons.more_vert),
@@ -256,7 +164,7 @@ class _ImagePost extends State<ImagePost> {
       children: <Widget>[
         Container(
             margin: const EdgeInsets.only(left: 20.0, right: 20, bottom: 5),
-            child: Text(description,
+            child: Text(post.description,
                 style: TextStyle(
                   color: MyColors.MAIN_TEXT_COLOR,
                   fontSize: 15,
@@ -280,14 +188,14 @@ class _ImagePost extends State<ImagePost> {
             onTap: () {
               goToComments(
                   context: context,
-                  postId: postId,
-                  ownerId: ownerId,
-                  mediaUrl: mediaUrl);
+                  postId: post.postId,
+                  ownerId: post.ownerId,
+                  mediaUrl: post.mediaUrl);
             }),
         Expanded(
             child: Container(
                 margin: EdgeInsets.only(right: 20),
-                child: Text(postTime,
+                child: Text(post.postTime,
                     textAlign: TextAlign.right,
                     style: TextStyle(color: Colors.grey, fontSize: 12))))
       ],
@@ -300,7 +208,7 @@ class _ImagePost extends State<ImagePost> {
         Container(
           margin: const EdgeInsets.only(left: 20.0),
           child: Text(
-            "$likeCount likes",
+            "$post.likeCount likes",
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey,
@@ -313,16 +221,12 @@ class _ImagePost extends State<ImagePost> {
 
   @override
   Widget build(BuildContext context) {
-    liked = false;
-    // (likes[AccountService.googleSignIn().currentUser.id.toString()] ==
-    //     true);
-
     return Container(
         color: MyColors.BACKGROUND,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            buildPostHeader(ownerId: ownerId),
+            buildPostHeader(ownerId: post.ownerId),
             buildDesc(context),
             buildLikeableImage(),
             buildComment(context),
@@ -331,36 +235,34 @@ class _ImagePost extends State<ImagePost> {
         ));
   }
 
+  bool liked(){
+    if( AccountService.googleSignIn().currentUser == null){
+      return false;
+    }
+    var userId = AccountService.googleSignIn().currentUser.id;
+    return post.likes[userId];
+  }
+
   void _likePost(String postId2) {
     var userId = AccountService.googleSignIn().currentUser.id;
-    bool _liked = likes[userId] == true;
+    bool _liked = liked();
 
     if (_liked) {
       print('removing like');
-      reference.doc(postId).update({
-        'likes.$userId': false
-        //firestore plugin doesnt support deleting, so it must be nulled / falsed
-      });
-
+      PostModel.unLike(userId, post.postId);
       setState(() {
-        likeCount = likeCount - 1;
-        liked = false;
-        likes[userId] = false;
+        post.likeCount = post.likeCount - 1;
+        post.likes[userId] = false;
       });
-
-      removeActivityFeedItem();
-    }
-
-    if (!_liked) {
+      FeedModel.removeActivityFeedItem(post.ownerId, post.postId);
+    }else{
       print('liking');
-      reference.doc(postId).update({'likes.$userId': true});
-
-      addActivityFeedItem();
-
+      PostModel.like(userId, post.postId);
+      FeedModel.addPostLike(
+          post.postId, post.mediaUrl, AccountService.currentUser());
       setState(() {
-        likeCount = likeCount + 1;
-        liked = true;
-        likes[userId] = true;
+        post.likeCount = post.likeCount + 1;
+        post.likes[userId] = true;
         showHeart = true;
       });
       Timer(const Duration(milliseconds: 2000), () {
@@ -370,33 +272,6 @@ class _ImagePost extends State<ImagePost> {
       });
     }
   }
-
-  void addActivityFeedItem() {
-    User currentUserModel = AccountService.currentUser();
-    FirebaseFirestore.instance
-        .collection(Constants.COLLECTION_FEED)
-        .doc(ownerId)
-        .collection("items")
-        .doc(postId)
-        .set({
-      "username": currentUserModel.username,
-      "userId": currentUserModel.id,
-      "type": "like",
-      "userProfileImg": currentUserModel.photoUrl,
-      "mediaUrl": mediaUrl,
-      "timestamp": DateTime.now(),
-      "postId": postId,
-    });
-  }
-
-  void removeActivityFeedItem() {
-    FirebaseFirestore.instance
-        .collection(Constants.COLLECTION_FEED)
-        .doc(ownerId)
-        .collection("items")
-        .doc(postId)
-        .delete();
-  }
 }
 
 class ImagePostFromId extends StatelessWidget {
@@ -404,18 +279,10 @@ class ImagePostFromId extends StatelessWidget {
 
   const ImagePostFromId({this.id});
 
-  getImagePost() async {
-    var document = await FirebaseFirestore.instance
-        .collection(Constants.COLLECTION_POSTS)
-        .doc(id)
-        .get();
-    return ImagePost.fromDocument(document);
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: getImagePost(),
+        future: PostModel.getPostById(id),
         builder: (context, snapshot) {
           if (!snapshot.hasData)
             return Container(

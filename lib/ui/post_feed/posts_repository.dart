@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:orangda/common/constants/constants.dart';
+import 'package:orangda/models/post/post.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
 import 'package:loading_more_list_library/loading_more_list_library.dart';
 
@@ -9,7 +10,7 @@ class PostRepository extends LoadingMoreBase<ImagePost> {
   PostRepository(
       {this.maxLength = 300,
       this.pageCount = 20,
-      this.collection = Constants.COLLECTION_POSTS});
+      this.collection = Constants.COLLECTION_POST});
 
   int _pageIndex = 1;
   final int pageCount;
@@ -44,7 +45,7 @@ class PostRepository extends LoadingMoreBase<ImagePost> {
         .getDocuments();
     for (var doc in snap.documents) {
       lastDocument = doc;
-      posts.add(ImagePost.fromDocument(doc));
+      posts.add(ImagePost(Post.fromDocument(doc)));
     }
     return posts;
   }
@@ -58,7 +59,7 @@ class PostRepository extends LoadingMoreBase<ImagePost> {
         .limit(pageCount)
         .getDocuments();
     for (var doc in snap.documents) {
-      posts.add(ImagePost.fromDocument(doc));
+      posts.add(ImagePost(Post.fromDocument(doc)));
     }
     return posts;
   }

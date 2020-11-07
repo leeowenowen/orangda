@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:orangda/common/utils/font_util.dart';
+import 'package:orangda/models/post/post.dart';
+import 'package:orangda/models/post/post_model.dart';
 import 'package:orangda/themes/theme.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
-
-import '../../common/constants/constants.dart';
 
 class Feed extends StatefulWidget {
   _Feed createState() => _Feed();
@@ -25,12 +23,13 @@ class _Feed extends State<Feed> {
     return Scaffold(
         backgroundColor: MyColors.BACKGROUND,
         appBar: AppBar(
-          title: Row(
-              mainAxisAlignment:MainAxisAlignment.center,
-              children:[
-              Image.asset('assets/logo.png', width: 40,),
-              FontUtil.makeTitle(),]
-          ),
+          title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Image.asset(
+              'assets/logo.png',
+              width: 40,
+            ),
+            FontUtil.makeTitle(),
+          ]),
           centerTitle: true,
         ),
         body: _buildFeed());
@@ -38,37 +37,34 @@ class _Feed extends State<Feed> {
 
   Widget _buildFeed() {
     return StreamBuilder<QuerySnapshot>(
-      stream: _fetchPosts(),
+      stream: PostModel.getAllPost(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data.size > 4) {
+        if (snapshot.hasData && snapshot.data.size > 0) {
           return ListView.separated(
               shrinkWrap: true,
               physics: BouncingScrollPhysics(),
               itemCount: snapshot.data.docs.length,
               separatorBuilder: (context, index) {
-                return Container(height: 0,color: Colors.red,);
+                return Container(
+                  height: 0,
+                  color: Colors.red,
+                );
               },
               itemBuilder: (context, index) {
                 var doc = snapshot.data.docs[index];
-                final ImagePost imagePost = ImagePost.fromDocument(doc);
+                if(doc == null){
+                  debugPrint('null doc');
+                }
+                Post post = Post.fromDocument(doc);
+                final ImagePost imagePost = ImagePost(post);
                 return imagePost;
-                // return Container(height: 300,color: Colors.black,);
-
               });
-
         }
-        // return Container(height: 300,color: Colors.black,);
-        return Center(child: CircularProgressIndicator(
-            backgroundColor:Colors.red,
+        return Center(
+            child: CircularProgressIndicator(
+          backgroundColor: Colors.red,
         ));
       },
     );
-  }
-
-  Stream<QuerySnapshot> _fetchPosts() {
-    return FirebaseFirestore.instance
-        .collection(Constants.COLLECTION_POSTS)
-        .orderBy("timestamp")
-        .snapshots();
   }
 }

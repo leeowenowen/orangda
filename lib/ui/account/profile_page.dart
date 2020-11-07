@@ -1,14 +1,18 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:orangda/common/constants/constants.dart';
+import 'package:orangda/models/post/post.dart';
 import 'package:orangda/service/account_service.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
-import 'dart:async';
-import 'edit_profile_page.dart';
+
 import '../../models/user.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   static final String ROUTE = 'profile_page';
+
   const ProfilePage({this.userId});
 
   final String userId;
@@ -26,6 +30,7 @@ class _ProfilePage extends State<ProfilePage>
   int postCount = 0;
   int followerCount = 0;
   int followingCount = 0;
+
   _ProfilePage(this.profileId);
 
   editProfile() {
@@ -76,12 +81,16 @@ class _ProfilePage extends State<ProfilePage>
       followButtonClicked = true;
     });
 
-    Firestore.instance.document(Constants.COLLECTION_USER+ "/$profileId").updateData({
+    Firestore.instance
+        .document(Constants.COLLECTION_USER + "/$profileId")
+        .updateData({
       'followers.$currentUserId': true
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
 
-    Firestore.instance.document(Constants.COLLECTION_USER+"/$currentUserId").updateData({
+    Firestore.instance
+        .document(Constants.COLLECTION_USER + "/$currentUserId")
+        .updateData({
       'following.$profileId': true
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
@@ -89,7 +98,7 @@ class _ProfilePage extends State<ProfilePage>
     //updates activity feed
     User currentUserModel = AccountService.currentUser();
     Firestore.instance
-        .collection( Constants.COLLECTION_FEED)
+        .collection(Constants.COLLECTION_FEED)
         .document(profileId)
         .collection("items")
         .document(currentUserId)
@@ -109,12 +118,16 @@ class _ProfilePage extends State<ProfilePage>
       followButtonClicked = true;
     });
 
-    Firestore.instance.document(Constants.COLLECTION_USER+"/$profileId").updateData({
+    Firestore.instance
+        .document(Constants.COLLECTION_USER + "/$profileId")
+        .updateData({
       'followers.$currentUserId': false
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
 
-    Firestore.instance.document(Constants.COLLECTION_USER+"/$currentUserId").updateData({
+    Firestore.instance
+        .document(Constants.COLLECTION_USER + "/$currentUserId")
+        .updateData({
       'following.$profileId': false
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
@@ -170,8 +183,8 @@ class _ProfilePage extends State<ProfilePage>
                   borderRadius: BorderRadius.circular(5.0)),
               alignment: Alignment.center,
               child: Text(text,
-                  style: TextStyle(
-                      color: textColor, fontWeight: FontWeight.bold)),
+                  style:
+                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
               width: 220.0,
               height: 27.0,
             )),
@@ -251,12 +264,14 @@ class _ProfilePage extends State<ProfilePage>
       Future<List<ImagePost>> getPosts() async {
         List<ImagePost> posts = [];
         var snap = await Firestore.instance
-            .collection(Constants.COLLECTION_POSTS)
+            .collection(Constants.COLLECTION_POST)
             .where('ownerId', isEqualTo: profileId)
             .orderBy("timestamp")
             .getDocuments();
         for (var doc in snap.documents) {
-          posts.add(ImagePost.fromDocument(doc));
+          Post post = Post.fromDocument(doc);
+          ImagePost imagePost = ImagePost(post);
+          posts.add(ImagePost(Post.fromDocument(doc)));
         }
         setState(() {
           postCount = snap.documents.length;
@@ -318,8 +333,8 @@ class _ProfilePage extends State<ProfilePage>
           }
 
           return Scaffold(
-              body: Container(
-                child:ListView(
+            body: Container(
+              child: ListView(
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -380,7 +395,7 @@ class _ProfilePage extends State<ProfilePage>
                   buildUserPosts(),
                 ],
               ),
-              ),
+            ),
           );
         });
   }
@@ -440,7 +455,7 @@ class ImageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () => clickedImage(context),
-        child: Image.network(imagePost.mediaUrl, fit: BoxFit.cover));
+        child: Image.network(imagePost.post.mediaUrl, fit: BoxFit.cover));
   }
 }
 

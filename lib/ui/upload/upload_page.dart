@@ -206,7 +206,7 @@ class _Uploader extends State<Uploader> {
 
     uploadImage(file).then((String data) {
       dynamic args = ModalRoute.of(context).settings.arguments;
-      String collection = Constants.COLLECTION_POSTS;
+      String collection = Constants.COLLECTION_POST;
       if (args['collection'] != null) {
         collection = args['collection'];
       }

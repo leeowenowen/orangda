@@ -1,4 +1,3 @@
-
 import 'package:orangda/common/utils/preferences.dart';
 import 'package:package_info/package_info.dart';
 
@@ -21,6 +20,6 @@ class AppUtil {
   }
 
   static bool isFirstRun() {
-     return _isFirstRun;
+    return _isFirstRun;
   }
 }

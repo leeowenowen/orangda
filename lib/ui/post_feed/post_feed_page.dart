@@ -16,7 +16,7 @@ class PostFeedPage extends StatefulWidget {
 class _PostFeedPageState extends State<PostFeedPage> {
   PostRepository listSourceRepository = PostRepository(
     pageCount: 20,
-    collection: Constants.COLLECTION_POSTS,
+    collection: Constants.COLLECTION_POST,
   );
   DateTime dateTimeNow;
 
