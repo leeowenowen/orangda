@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:orangda/common/utils/time_util.dart';
 
 class Post{
+  final List<String> images2;
   final String mediaUrl;
   final String username;
   final String location;
@@ -13,7 +14,8 @@ class Post{
   int likeCount;
 
   Post(
-      {this.mediaUrl,
+      {this.images2,
+        this.mediaUrl,
         this.username,
         this.location,
         this.description,
@@ -29,7 +31,8 @@ class Post{
     return Post(
         username: document['username'],
         location: document['location'],
-        mediaUrl: document['mediaUrl'],
+         images2: document.data()['images'],
+        mediaUrl:document.data()['mediaUrl'],
         likes: document['likes'],
         description: document['description'],
         postId: document.id,
@@ -41,13 +44,17 @@ class Post{
     return Post(
       username: data['username'],
       location: data['location'],
-      mediaUrl: data['mediaUrl'],
+      images2: data['images'],
       likes: data['likes'],
       description: data['description'],
       ownerId: data['ownerId'],
       postId: data['postId'],
       postTime: data['timestamp'],
     );
+  }
+
+  String coverUrl(){
+    return mediaUrl;
   }
 
 

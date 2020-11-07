@@ -62,7 +62,7 @@ class _ImagePost extends State<ImagePost> {
         alignment: Alignment.center,
         children: <Widget>[
           CachedNetworkImage(
-            imageUrl: post.mediaUrl,
+            imageUrl: post.coverUrl(),
             fit: BoxFit.fitWidth,
             placeholder: (context, url) => loadingPlaceHolder,
             errorWidget: (context, url, error) => Icon(Icons.error),
@@ -190,7 +190,7 @@ class _ImagePost extends State<ImagePost> {
                   context: context,
                   postId: post.postId,
                   ownerId: post.ownerId,
-                  mediaUrl: post.mediaUrl);
+                  mediaUrl: post.coverUrl());
             }),
         Expanded(
             child: Container(
@@ -260,7 +260,7 @@ class _ImagePost extends State<ImagePost> {
       print('liking');
       PostModel.like(userId, post.postId);
       FeedModel.addPostLike(
-          post.postId, post.mediaUrl, AccountService.currentUser());
+          post.postId, post.coverUrl(), AccountService.currentUser());
       setState(() {
         post.likeCount = post.likeCount + 1;
         post.likes[userId] = true;

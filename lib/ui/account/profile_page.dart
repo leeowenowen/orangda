@@ -455,7 +455,7 @@ class ImageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () => clickedImage(context),
-        child: Image.network(imagePost.post.mediaUrl, fit: BoxFit.cover));
+        child: Image.network(imagePost.post.coverUrl(), fit: BoxFit.cover));
   }
 }
 
