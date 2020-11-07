@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:orangda/common/utils/notification_util.dart';
 import 'package:orangda/models/user.dart';
@@ -56,12 +57,12 @@ class AccountService {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final auth.AuthCredential credential = auth.GoogleAuthProvider.getCredential(
+      final auth.AuthCredential credential = auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      await _auth.signInWithCredential(credential);
+      auth.UserCredential userCredential = await _auth.signInWithCredential(credential);
       NotificationUtil.setUpNotifications();
     }
     return _currentUserModel != null;
@@ -81,7 +82,7 @@ class AccountService {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      final auth.AuthCredential credential = auth.GoogleAuthProvider.getCredential(
+      final auth.AuthCredential credential = auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
@@ -96,7 +97,7 @@ class AccountService {
     if (user == null) {
       return null;
     }
-    DocumentSnapshot userRecord = await ref.document(user.id).get();
+    DocumentSnapshot userRecord = await ref.doc(user.id).get();
     if (userRecord.data == null) {
       // no user record exists, time to create
 
@@ -105,7 +106,7 @@ class AccountService {
       );
 
       if (userName != null || userName.length != 0) {
-        ref.document(user.id).setData({
+        ref.doc(user.id).set({
           "id": user.id,
           "username": userName,
           "photoUrl": user.photoUrl,
@@ -123,5 +124,39 @@ class AccountService {
     AccountService.setCurrentUser(currentUser);
     currentUserModel = currentUser;
     return null;
+  }
+
+  static void  _signInWithGoogle() async {
+    try {
+      auth.UserCredential userCredential;
+      final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+      final auth.GoogleAuthCredential googleAuthCredential =
+      auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      userCredential = await _auth.signInWithCredential(googleAuthCredential);
+
+      final user = userCredential.user;
+      Fluttertoast.showToast(msg: 'Login success!');
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(msg: 'Login failed!');
+    }
+  }
+
+  static void  _signInWithFacebook() async {
+    try {
+      final auth.AuthCredential credential =
+      auth.FacebookAuthProvider.credential('facebook_token');
+      final auth.User user = (await _auth.signInWithCredential(credential)).user;
+
+      Fluttertoast.showToast(msg: 'Login success!');
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(msg: 'Login failed!');
+    }
   }
 }
