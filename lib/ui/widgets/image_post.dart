@@ -203,12 +203,13 @@ class _ImagePost extends State<ImagePost> {
   }
 
   Widget buildLikeCount(BuildContext context) {
+    int likeCount = post.likeCount;
     return Row(
       children: <Widget>[
         Container(
           margin: const EdgeInsets.only(left: 20.0),
           child: Text(
-            "$post.likeCount likes",
+            "$likeCount likes",
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey,
