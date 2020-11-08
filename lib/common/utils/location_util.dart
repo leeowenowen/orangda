@@ -6,27 +6,51 @@ import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:location/location.dart';
 
-getUserLocation() async {
-  LocationData currentLocation;
-  String error;
-  Location location = Location();
+Future<LocationData> getLocation() async {
+  Location location = new Location();
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
+    if (!_serviceEnabled) {
+      return null;
+    }
+  }
+
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.granted) {
+    return await location.getLocation();
+  } else {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted == PermissionStatus.granted) {
+      return await location.getLocation();
+    }
+    return null;
+  }
+}
+
+Future<Address> getUserLocation() async {
   try {
-    currentLocation = await location.getLocation();
+    LocationData currentLocation = await getLocation();
+    if (currentLocation == null) {
+      return null;
+    }
+    final coordinates =
+        Coordinates(currentLocation.latitude, currentLocation.longitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    return first;
   } on PlatformException catch (e) {
     if (e.code == 'PERMISSION_DENIED') {
-      error = 'please grant permission';
-      print(error);
+      print(e.message);
     }
     if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
-      error = 'permission denied- please enable it from app settings';
-      print(error);
+      print(e.message);
     }
-    currentLocation = null;
   }
-  final coordinates = Coordinates(
-      currentLocation.latitude, currentLocation.longitude);
-  var addresses =
-      await Geocoder.local.findAddressesFromCoordinates(coordinates);
-  var first = addresses.first;
-  return first;
+  return null;
 }

@@ -16,7 +16,8 @@ import 'service/account_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding
-      .ensureInitialized(); 
+      .ensureInitialized();
+
   await Firebase.initializeApp();
   await Prefs.init();
   await AppUtil.init();

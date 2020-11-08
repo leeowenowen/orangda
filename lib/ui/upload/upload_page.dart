@@ -4,18 +4,17 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:orangda/common/constants/constants.dart';
 import 'package:orangda/service/account_service.dart';
-import 'package:geocoder/geocoder.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../common/utils/location_util.dart';
 import '../../models/user.dart';
 
 class UploadPage extends StatefulWidget {
-  static final String ROUTE = 'home_page';
+  static final String ROUTE = 'UploadPage';
 
   _UploadPageState createState() => _UploadPageState();
 }
@@ -59,10 +58,14 @@ class _UploadPageState extends State<UploadPage> {
 
   Widget build(BuildContext context) {
     return file == null
-        ? IconButton(
-            icon: Icon(Icons.file_upload),
-            onPressed: () => {_selectImage(context)})
-        : Scaffold(
+        ? Container()
+        :
+        // file == null
+        //   ? IconButton(
+        //       icon: Icon(Icons.file_upload),
+        //       onPressed: () => {_selectImage(context)})
+        //   :
+        Scaffold(
             resizeToAvoidBottomPadding: false,
             appBar: AppBar(
               backgroundColor: Colors.white70,

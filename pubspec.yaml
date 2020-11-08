@@ -52,15 +52,14 @@ dependencies:
   firebase_dynamic_links: ^0.6.2
   fluttertoast: ^7.1.1
   after_layout: ^1.0.7+2
-
-  file_picker: ^2.0.12
+  multi_image_picker: ^4.7.14
   uuid: ^2.0.4
   image: ^2.1.11
   font_awesome_flutter: ^8.5.0
   async: ^2.4.0
   http: ^0.12.0+3
   cached_network_image: ^2.0.0
-  location: ^2.3.5
+  location: ^3.0.2
   geocoder: ^0.2.1
   flare_flutter: ^1.8.3
   webview_flutter: ^1.0.3
