@@ -237,15 +237,18 @@ class _ImagePost extends State<ImagePost> {
   }
 
   bool liked(){
-    if( AccountService.googleSignIn().currentUser == null){
+    if( AccountService.currentUser() == null){
       return false;
     }
-    var userId = AccountService.googleSignIn().currentUser.id;
-    return post.likes[userId];
+    var userId = AccountService.currentUser().id;
+    if(post.likes.containsKey(userId)){
+      return post.likes[userId];
+    }
+    return false;
   }
 
   void _likePost(String postId2) {
-    var userId = AccountService.googleSignIn().currentUser.id;
+    var userId = AccountService.currentUser().id;
     bool _liked = liked();
 
     if (_liked) {

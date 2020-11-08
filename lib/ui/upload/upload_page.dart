@@ -14,11 +14,13 @@ import 'package:uuid/uuid.dart';
 import '../../common/utils/location_util.dart';
 import '../../models/user.dart';
 
-class Uploader extends StatefulWidget {
-  _Uploader createState() => _Uploader();
+class UploadPage extends StatefulWidget {
+  static final String ROUTE = 'home_page';
+
+  _UploadPageState createState() => _UploadPageState();
 }
 
-class _Uploader extends State<Uploader> {
+class _UploadPageState extends State<UploadPage> {
   File file;
 
   //Strings required to save address
@@ -308,16 +310,15 @@ void postToFireStore(
     String location,
     String description,
     String collection}) async {
-  var reference = Firestore.instance.collection(collection);
+  var reference = FirebaseFirestore.instance.collection(collection);
   User currentUserModel = AccountService.currentUser();
-  GoogleSignIn googleSignIn = AccountService.googleSignIn();
   reference.add({
     "username": currentUserModel.username,
     "location": location,
     "likes": {},
     "mediaUrl": mediaUrl,
     "description": description,
-    "ownerId": googleSignIn.currentUser.id,
+    "ownerId": currentUserModel.id,
     "timestamp": DateTime.now(),
   }).then((DocumentReference doc) {
     String docId = doc.documentID;

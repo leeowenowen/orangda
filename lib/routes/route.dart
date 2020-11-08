@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:orangda/ui/account/edit_profile_page.dart';
 import 'package:orangda/ui/account/login_page.dart';
 import 'package:orangda/ui/account/profile_page.dart';
 import 'package:orangda/ui/account/set_account_info_page.dart';
@@ -10,6 +11,7 @@ import 'package:orangda/ui/demo/random_size_demo.dart';
 import 'package:orangda/ui/demo/variable_size_demo.dart';
 import 'package:orangda/ui/home/home_page.dart';
 import 'package:orangda/ui/startup/user_guidence_page.dart';
+import 'package:orangda/ui/upload/upload_page.dart';
 
 class Routes {
   static Map<String, WidgetBuilder> getRoute() {
@@ -25,6 +27,8 @@ class Routes {
       CommentPage.ROUTE: (_) => CommentPage(),
       ProfilePage.ROUTE: (_) => ProfilePage(),
       SetAccountInfoPage.ROUTE: (_) => SetAccountInfoPage(),
+      EditProfilePage.ROUTE: (_) => EditProfilePage(),
+      UploadPage.ROUTE: (_) => UploadPage(),
     };
   }
 }

@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "208057871960",
+    "firebase_url": "https://orange-86885.firebaseio.com",
+    "project_id": "orange-86885",
+    "storage_bucket": "orange-86885.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208057871960:android:735ede64d74576c250a42d",
+        "android_client_info": {
+          "package_name": "com.orangda"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "208057871960-vmc7j8pc0in56b3jbr3p4l7om26o6gb6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orangda",
+            "certificate_hash": "cd710949dd4444810fd02e3d21df790c7f4982a2"
+          }
+        },
+        {
+          "client_id": "208057871960-ck1df8etml11i8meoblvgjte4itsfovf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orangda",
+            "certificate_hash": "f320eba23d5ee7859fcaf440d3825d09e7b2673b"
+          }
+        },
+        {
+          "client_id": "208057871960-k8i7d454tvo3p23h05kr7jot9663j2io.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoTn4RnTsJAzUnbiylGL6XD09lp-2VfG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "208057871960-bp9fnh5rue42dc51em6mmcf0l0k6lkhp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

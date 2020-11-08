@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:after_layout/after_layout.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:orangda/localization/my_l10n.dart';
 import 'package:orangda/themes/theme.dart';
-import 'package:orangda/ui/demo/variable_size_demo.dart';
+import 'package:orangda/ui/account/profile_page.dart';
+import 'package:orangda/ui/demo/demo_page.dart';
 import 'package:orangda/ui/feed/feed.dart';
-import 'package:orangda/ui/widgets/fancy_bottom_navigation.dart';
 import 'package:orangda_photo_selector/photo_selector_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,43 +21,14 @@ class HomePage extends StatefulWidget {
 
 enum TabType { FEED, ACTIVITY, ADD, DUMMY, ME }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with AfterLayoutMixin<HomePage>  {
   int _page = 0;
   PageController _pageController;
-  StreamController<int> indexcontroller = StreamController<int>.broadcast();
-
-  String _getPageTitle() {
-    String key;
-    switch (_page) {
-      case 0:
-        key = 'main.title';
-        break;
-      // case 1:
-      //   key = 'smile_wall.title';
-      //   break;
-      case 1:
-        key = 'share.title';
-        break;
-      // case 3:
-      //   key = 'dummy.title';
-      //   break;
-      case 2:
-        key = 'me.title';
-        break;
-      default:
-        break;
-    }
-    return MyLocalizations.of(context).get(key);
-  }
+  StreamController<int> indexController = StreamController<int>.broadcast();
 
   @override
   Widget build(BuildContext context) {
-    return
-        // (AccountService.googleSignIn().currentUser == null ||
-        //   currentUserModel == null)
-        //   ? LoginPage()
-        //   :
-        Scaffold(
+    return Scaffold(
       backgroundColor: MyColors.BACKGROUND,
       body: Container(
         color: MyColors.BACKGROUND,
@@ -71,7 +42,7 @@ class _HomePageState extends State<HomePage> {
               child: PhotoSelectorView(),
             ),
             Container(
-              child: VariableSizedDemo(),
+              child: ProfilePage(),
             ),
             // Container(
             //   color: Colors.white,
@@ -91,13 +62,16 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBottomBar() {
     return ConvexAppBar(
+      gradient: LinearGradient(colors:[
+        Colors.deepOrange,Colors.black87,
+      ]),
       color: MyColors.FOREGROUND,
       backgroundColor: MyColors.BACKGROUND,
       activeColor: MyColors.HIGHLIGHT_COLOR,
       height: 50,
       top: -20,
       items: [
-        TabItem(icon: Icons.home, title: ''),
+        TabItem(icon: Icons.home,title: ''),
         // TabItem(icon: Icons.map, title: 'Discovery'),
         TabItem(icon: Icons.camera_alt, title: ''),
         // TabItem(icon: Icons.message, title: 'Message'),
@@ -106,36 +80,10 @@ class _HomePageState extends State<HomePage> {
       initialActiveIndex: 0,
       //optional, default as 0
       onTap: (value) {
-        indexcontroller.add(value);
+        indexController.add(value);
         _pageController.jumpToPage(value);
       },
     );
-  }
-
-  Widget _buildBottomBarV2() {
-    return StreamBuilder<Object>(
-        initialData: 0,
-        stream: indexcontroller.stream,
-        builder: (context, snapshot) {
-          int cIndex = snapshot.data;
-          return FancyBottomNavigation(
-            currentIndex: cIndex,
-            items: <FancyBottomNavigationItem>[
-              FancyBottomNavigationItem(
-                  icon: Icon(Icons.home), title: Text('Home')),
-              FancyBottomNavigationItem(
-                  icon: Icon(Icons.local_activity), title: Text('Activity')),
-              FancyBottomNavigationItem(
-                  icon: Icon(Icons.thumb_up), title: Text('Thank You')),
-              FancyBottomNavigationItem(
-                  icon: Icon(Icons.person), title: Text('Me')),
-            ],
-            onItemSelected: (int value) {
-              indexcontroller.add(value);
-              _pageController.jumpToPage(value);
-            },
-          );
-        });
   }
 
   void onPageChanged(int page) {
@@ -147,6 +95,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // parseParams(context);
     _pageController = PageController(initialPage: _page);
   }
 
@@ -156,15 +105,21 @@ class _HomePageState extends State<HomePage> {
     _pageController.dispose();
   }
 
-  @override
-  void afterFirstLayout(BuildContext context) {
+  void parseParams(BuildContext context) {
     if (ModalRoute.of(context).settings.arguments != null) {
       Map<String, Object> args = ModalRoute.of(context).settings.arguments;
       TabType specifyTab = args['tab'];
-      if (specifyTab != null)
+      if (specifyTab != null) {
         setState(() {
           _page = specifyTab.index;
+
         });
+      }
     }
   }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    parseParams(context);
+    }
 }

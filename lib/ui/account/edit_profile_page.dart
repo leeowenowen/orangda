@@ -7,6 +7,8 @@ import '../../models/user.dart';
 import '../../service/account_service.dart';
 
 class EditProfilePage extends StatelessWidget {
+  static final String ROUTE = 'edit_profile_page';
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController bioController = TextEditingController();
 

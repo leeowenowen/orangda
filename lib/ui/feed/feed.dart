@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:orangda/common/utils/font_util.dart';
 import 'package:orangda/models/post/post.dart';
 import 'package:orangda/models/post/post_model.dart';
 import 'package:orangda/themes/theme.dart';
+import 'package:orangda/ui/upload/upload_page.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
 
 class Feed extends StatefulWidget {
@@ -18,18 +20,40 @@ class _Feed extends State<Feed> {
     super.initState();
   }
 
+  Future<void> onUpload() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+    Navigator.of(context).pushNamed(UploadPage.ROUTE, arguments: {
+      'FilePickerResult': result
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: MyColors.BACKGROUND,
         appBar: AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Image.asset(
-              'assets/logo.png',
-              width: 40,
-            ),
-            FontUtil.makeTitle(),
-          ]),
+          titleSpacing: 0,
+          shadowColor: Colors.white54,
+          title: Container(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                Image.asset(
+                  'assets/logo.png',
+                  width: 40,
+                ),
+                FontUtil.makeTitle(),
+                IconButton(
+                  icon: Icon(
+                    Icons.add_photo_alternate,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  onPressed: onUpload,
+                )
+              ])),
           centerTitle: true,
         ),
         body: _buildFeed());
@@ -52,7 +76,7 @@ class _Feed extends State<Feed> {
               },
               itemBuilder: (context, index) {
                 var doc = snapshot.data.docs[index];
-                if(doc == null){
+                if (doc == null) {
                   debugPrint('null doc');
                 }
                 Post post = Post.fromDocument(doc);

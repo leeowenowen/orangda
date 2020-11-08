@@ -1,30 +1,22 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:orangda/themes/theme.dart';
+import 'package:orangda/ui/account/login_page.dart';
 import 'package:orangda/ui/home/home_page.dart';
-import 'package:orangda_photo_selector/photo_selector_view.dart';
 
-import 'common/constants/constants.dart';
 import 'common/utils/app_util.dart';
 import 'common/utils/preferences.dart';
 import 'localization/my_l10n_delegate.dart';
-import 'models/user.dart';
 import 'routes/route.dart';
 import 'service/account_service.dart';
-import 'ui/account/login_page.dart';
-
-final ref = Firestore.instance.collection(Constants.COLLECTION_USER);
-
-User currentUserModel;
 
 Future<void> main() async {
   WidgetsFlutterBinding
-      .ensureInitialized(); // after upgrading flutter this is now necessary
+      .ensureInitialized(); 
   await Firebase.initializeApp();
   await Prefs.init();
   await AppUtil.init();

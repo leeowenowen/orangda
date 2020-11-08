@@ -1,29 +1,36 @@
 import 'dart:async';
 
+import 'package:after_layout/after_layout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:orangda/common/constants/constants.dart';
 import 'package:orangda/models/post/post.dart';
+import 'package:orangda/models/post/post_model.dart';
+import 'package:orangda/models/user/user_model.dart';
 import 'package:orangda/service/account_service.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
 
 import '../../models/user.dart';
 import 'edit_profile_page.dart';
+import 'image_tile.dart';
+import 'login_page.dart';
 
 class ProfilePage extends StatefulWidget {
   static final String ROUTE = 'profile_page';
 
-  const ProfilePage({this.userId});
+  ProfilePage();
 
-  final String userId;
-
-  _ProfilePage createState() => _ProfilePage(this.userId);
+  State createState(){
+      return _ProfilePageState();
+  }
 }
 
-class _ProfilePage extends State<ProfilePage>
-    with AutomaticKeepAliveClientMixin<ProfilePage> {
-  final String profileId;
-  String currentUserId = AccountService.googleSignIn().currentUser.id;
+class _ProfilePageState extends State<ProfilePage>
+    with
+        AutomaticKeepAliveClientMixin<ProfilePage>,
+        AfterLayoutMixin<ProfilePage> {
+  String profileId;
+  String currentUserId;
   String view = "grid"; // default view
   bool isFollowing = false;
   bool followButtonClicked = false;
@@ -31,7 +38,38 @@ class _ProfilePage extends State<ProfilePage>
   int followerCount = 0;
   int followingCount = 0;
 
-  _ProfilePage(this.profileId);
+  _ProfilePageState();
+  @override
+  void initState() {
+    super.initState();
+    if (AccountService.currentUser() != null) {
+      currentUserId = AccountService.currentUser().id;
+    }
+  }
+
+  void parseParams(BuildContext context) {
+    if (ModalRoute.of(context).settings.arguments != null) {
+      Map<String, Object> args = ModalRoute.of(context).settings.arguments;
+      String profileId = args['userId'];
+      if (profileId != null && profileId.isNotEmpty) {
+        this.profileId = profileId;
+      }
+    }
+  }
+
+  @override
+  Future<void> afterFirstLayout(BuildContext context) async {
+    parseParams(context);
+    if(AccountService.currentUser() == null){
+      await Navigator.of(context).pushNamed(LoginPage.ROUTE);
+      if(AccountService.currentUser() != null){
+        setState(() {
+          currentUserId = AccountService.currentUser().id;
+        });
+      }
+      return;
+    }
+  }
 
   editProfile() {
     EditProfilePage editPage = EditProfilePage();
@@ -75,41 +113,11 @@ class _ProfilePage extends State<ProfilePage>
   }
 
   followUser() {
-    print('following user');
     setState(() {
       this.isFollowing = true;
       followButtonClicked = true;
     });
-
-    Firestore.instance
-        .document(Constants.COLLECTION_USER + "/$profileId")
-        .updateData({
-      'followers.$currentUserId': true
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    Firestore.instance
-        .document(Constants.COLLECTION_USER + "/$currentUserId")
-        .updateData({
-      'following.$profileId': true
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    //updates activity feed
-    User currentUserModel = AccountService.currentUser();
-    Firestore.instance
-        .collection(Constants.COLLECTION_FEED)
-        .document(profileId)
-        .collection("items")
-        .document(currentUserId)
-        .setData({
-      "ownerId": profileId,
-      "username": currentUserModel.username,
-      "userId": currentUserId,
-      "type": "follow",
-      "userProfileImg": currentUserModel.photoUrl,
-      "timestamp": DateTime.now()
-    });
+    UserModel.followUser(profileId, currentUserId);
   }
 
   unfollowUser() {
@@ -117,216 +125,204 @@ class _ProfilePage extends State<ProfilePage>
       isFollowing = false;
       followButtonClicked = true;
     });
-
-    Firestore.instance
-        .document(Constants.COLLECTION_USER + "/$profileId")
-        .updateData({
-      'followers.$currentUserId': false
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    Firestore.instance
-        .document(Constants.COLLECTION_USER + "/$currentUserId")
-        .updateData({
-      'following.$profileId': false
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    Firestore.instance
-        .collection(Constants.COLLECTION_FEED)
-        .document(profileId)
-        .collection("items")
-        .document(currentUserId)
-        .delete();
+    UserModel.unFollowUser(profileId, currentUserId);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // reloads state when opened again
+  Column buildStatColumn(String label, int number) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          number.toString(),
+          style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+        ),
+        Container(
+            margin: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              label,
+              style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.w400),
+            ))
+      ],
+    );
+  }
 
-    Column buildStatColumn(String label, int number) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            number.toString(),
-            style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
-          ),
-          Container(
-              margin: const EdgeInsets.only(top: 4.0),
-              child: Text(
-                label,
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.w400),
-              ))
-        ],
-      );
-    }
 
-    Container buildFollowButton(
-        {String text,
+  Container buildFollowButton(
+      {String text,
         Color backgroundcolor,
         Color textColor,
         Color borderColor,
         Function function}) {
-      return Container(
-        padding: EdgeInsets.only(top: 2.0),
-        child: FlatButton(
-            onPressed: function,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: backgroundcolor,
-                  border: Border.all(color: borderColor),
-                  borderRadius: BorderRadius.circular(5.0)),
-              alignment: Alignment.center,
-              child: Text(text,
-                  style:
-                      TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              width: 220.0,
-              height: 27.0,
-            )),
-      );
-    }
-
-    Container buildProfileFollowButton(User user) {
-      // viewing your own profile - should show edit button
-      if (currentUserId == profileId) {
-        return buildFollowButton(
-          text: "Edit Profile",
-          backgroundcolor: Colors.white,
-          textColor: Colors.black,
-          borderColor: Colors.grey,
-          function: editProfile,
-        );
-      }
-
-      // already following user - should show unfollow button
-      if (isFollowing) {
-        return buildFollowButton(
-          text: "Unfollow",
-          backgroundcolor: Colors.white,
-          textColor: Colors.black,
-          borderColor: Colors.grey,
-          function: unfollowUser,
-        );
-      }
-
-      // does not follow user - should show follow button
-      if (!isFollowing) {
-        return buildFollowButton(
-          text: "Follow",
-          backgroundcolor: Colors.blue,
-          textColor: Colors.white,
-          borderColor: Colors.blue,
-          function: followUser,
-        );
-      }
-
+    return Container(
+      padding: EdgeInsets.only(top: 2.0),
+      child: FlatButton(
+          onPressed: function,
+          child: Container(
+            decoration: BoxDecoration(
+                color: backgroundcolor,
+                border: Border.all(color: borderColor),
+                borderRadius: BorderRadius.circular(5.0)),
+            alignment: Alignment.center,
+            child: Text(text,
+                style:
+                TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+            width: 220.0,
+            height: 27.0,
+          )),
+    );
+  }
+  Container buildProfileFollowButton(User user) {
+    // viewing your own profile - should show edit button
+    if (currentUserId != null && currentUserId == profileId) {
       return buildFollowButton(
-          text: "loading...",
-          backgroundcolor: Colors.white,
-          textColor: Colors.black,
-          borderColor: Colors.grey);
-    }
-
-    Row buildImageViewButtonBar() {
-      Color isActiveButtonColor(String viewName) {
-        if (view == viewName) {
-          return Colors.blueAccent;
-        } else {
-          return Colors.black26;
-        }
-      }
-
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.grid_on, color: isActiveButtonColor("grid")),
-            onPressed: () {
-              changeView("grid");
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.list, color: isActiveButtonColor("feed")),
-            onPressed: () {
-              changeView("feed");
-            },
-          ),
-        ],
+        text: "Edit Profile",
+        backgroundcolor: Colors.white,
+        textColor: Colors.black,
+        borderColor: Colors.grey,
+        function: editProfile,
       );
     }
 
-    Container buildUserPosts() {
-      Future<List<ImagePost>> getPosts() async {
-        List<ImagePost> posts = [];
-        var snap = await Firestore.instance
-            .collection(Constants.COLLECTION_POST)
-            .where('ownerId', isEqualTo: profileId)
-            .orderBy("timestamp")
-            .getDocuments();
-        for (var doc in snap.documents) {
-          Post post = Post.fromDocument(doc);
-          ImagePost imagePost = ImagePost(post);
-          posts.add(ImagePost(Post.fromDocument(doc)));
-        }
-        setState(() {
-          postCount = snap.documents.length;
-        });
-
-        return posts.reversed.toList();
-      }
-
-      return Container(
-          child: FutureBuilder<List<ImagePost>>(
-        future: getPosts(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Container(
-                alignment: FractionalOffset.center,
-                padding: const EdgeInsets.only(top: 10.0),
-                child: CircularProgressIndicator());
-          else if (view == "grid") {
-            // build the grid
-            return GridView.count(
-                crossAxisCount: 3,
-                childAspectRatio: 1.0,
-//                    padding: const EdgeInsets.all(0.5),
-                mainAxisSpacing: 1.5,
-                crossAxisSpacing: 1.5,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: snapshot.data.map((ImagePost imagePost) {
-                  return GridTile(child: ImageTile(imagePost));
-                }).toList());
-          } else if (view == "feed") {
-            return Column(
-                children: snapshot.data.map((ImagePost imagePost) {
-              return imagePost;
-            }).toList());
-          }
-          return Container();
-        },
-      ));
+    // already following user - should show unfollow button
+    if (isFollowing) {
+      return buildFollowButton(
+        text: "Unfollow",
+        backgroundcolor: Colors.white,
+        textColor: Colors.black,
+        borderColor: Colors.grey,
+        function: unfollowUser,
+      );
     }
 
+    // does not follow user - should show follow button
+    if (!isFollowing) {
+      return buildFollowButton(
+        text: "Follow",
+        backgroundcolor: Colors.blue,
+        textColor: Colors.white,
+        borderColor: Colors.blue,
+        function: followUser,
+      );
+    }
+
+    return buildFollowButton(
+        text: "loading...",
+        backgroundcolor: Colors.white,
+        textColor: Colors.black,
+        borderColor: Colors.grey);
+  }
+  Row buildImageViewButtonBar() {
+    Color isActiveButtonColor(String viewName) {
+      if (view == viewName) {
+        return Colors.blueAccent;
+      } else {
+        return Colors.black26;
+      }
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.grid_on, color: isActiveButtonColor("grid")),
+          onPressed: () {
+            changeView("grid");
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.list, color: isActiveButtonColor("feed")),
+          onPressed: () {
+            changeView("feed");
+          },
+        ),
+      ],
+    );
+  }
+
+  Container buildUserPosts() {
+    Future<List<ImagePost>> getPosts() async {
+      List<ImagePost> posts = [];
+      var snap = await PostModel.getPostByUserId(profileId);
+      for (var doc in snap.docs) {
+        Post post = Post.fromDocument(doc);
+        ImagePost imagePost = ImagePost(post);
+        posts.add(imagePost);
+      }
+      setState(() {
+        postCount = snap.docs.length;
+      });
+
+      return posts.reversed.toList();
+    }
+
+    return Container(
+        child: FutureBuilder<List<ImagePost>>(
+          future: getPosts(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData)
+              return Container(
+                  alignment: FractionalOffset.center,
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: CircularProgressIndicator());
+            else if (view == "grid") {
+              // build the grid
+              return GridView.count(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.0,
+//                    padding: const EdgeInsets.all(0.5),
+                  mainAxisSpacing: 1.5,
+                  crossAxisSpacing: 1.5,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: snapshot.data.map((ImagePost imagePost) {
+                    return GridTile(child: ImageTile(imagePost));
+                  }).toList());
+            } else if (view == "feed") {
+              return Column(
+                  children: snapshot.data.map((ImagePost imagePost) {
+                    return imagePost;
+                  }).toList());
+            }
+            return Container();
+          },
+        ));
+  }
+  void updateProfileId(){
+    parseParams(context);
+    if(profileId == null || profileId.isEmpty){
+      if(AccountService.currentUser() != null){
+        profileId = AccountService.currentUser().id;
+      }
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    updateProfileId();
+    if(profileId == null || profileId.isEmpty){
+      return Container(
+          alignment: FractionalOffset.center,
+          child: CircularProgressIndicator());
+    }
     return StreamBuilder(
-        stream: Firestore.instance
+        stream: FirebaseFirestore.instance
             .collection(Constants.COLLECTION_USER)
-            .document(profileId)
+            .doc(profileId)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return Container(
                 alignment: FractionalOffset.center,
                 child: CircularProgressIndicator());
+          }
 
           User user = User.fromDocument(snapshot.data);
 
-          if (user.followers.containsKey(currentUserId) &&
+          if (currentUserId != null && user.followers.containsKey(currentUserId) &&
               user.followers[currentUserId] &&
               followButtonClicked == false) {
             isFollowing = true;
@@ -425,43 +421,8 @@ class _ProfilePage extends State<ProfilePage>
   bool get wantKeepAlive => true;
 }
 
-class ImageTile extends StatelessWidget {
-  final ImagePost imagePost;
-
-  ImageTile(this.imagePost);
-
-  clickedImage(BuildContext context) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-      return Center(
-        child: Scaffold(
-            appBar: AppBar(
-              title: Text('Photo',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.white,
-            ),
-            body: ListView(
-              children: <Widget>[
-                Container(
-                  child: imagePost,
-                ),
-              ],
-            )),
-      );
-    }));
-  }
-
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: () => clickedImage(context),
-        child: Image.network(imagePost.post.coverUrl(), fit: BoxFit.cover));
-  }
-}
-
 void openProfile(BuildContext context, String userId) {
-  Navigator.of(context)
-      .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-    return ProfilePage(userId: userId);
-  }));
+  Navigator.of(context).pushNamed(ProfilePage.ROUTE, arguments: {
+    "userId": userId
+  });
 }

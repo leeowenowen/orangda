@@ -47,10 +47,13 @@ dependencies:
   firebase_core: ^0.5.1
   firebase_messaging: ^7.0.3
   google_sign_in: ^4.5.5
+  flutter_facebook_login: ^3.0.0
   flutter_signin_button: ^1.1.0
   firebase_dynamic_links: ^0.6.2
   fluttertoast: ^7.1.1
+  after_layout: ^1.0.7+2
 
+  file_picker: ^2.0.12
   uuid: ^2.0.4
   image: ^2.1.11
   font_awesome_flutter: ^8.5.0
