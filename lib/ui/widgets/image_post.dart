@@ -86,6 +86,17 @@ class _ImagePost extends State<ImagePost> {
     );
   }
 
+  String getUserName(Map<String, dynamic> data){
+    if(data['username'] != null){
+      return data['username'];
+    }
+    if(data['displayName'] != null){
+      return data['displayName'];
+    }
+
+    return 'Someone';
+  }
+
   buildPostHeader({String ownerId}) {
     if (ownerId == null) {
       return Text("Someone", style: TextStyle(color: MyColors.MAIN_TEXT_COLOR));
@@ -96,6 +107,9 @@ class _ImagePost extends State<ImagePost> {
         builder: (context, snapshot) {
           if (snapshot.data != null) {
             var data = snapshot.data.data();
+            if(data == null){
+              debugPrint('null data');
+            }
             return Container(
               child: ListTile(
                 leading: CircleAvatar(
@@ -103,7 +117,7 @@ class _ImagePost extends State<ImagePost> {
                   backgroundColor: Colors.grey,
                 ),
                 title: GestureDetector(
-                  child: Text(data['username'],
+                  child: Text(getUserName(data),
                       style: TextStyle(
                           color: MyColors.MAIN_TEXT_COLOR,
                           fontWeight: FontWeight.bold)),
@@ -117,7 +131,7 @@ class _ImagePost extends State<ImagePost> {
                     data: IconThemeData(size: 15, color: Colors.blue),
                     child: Icon(Icons.location_on),
                   ),
-                  Text(this.post.location,
+                  Text((this.post.location == null) ? '' : this.post.location,
                       style: TextStyle(color: MyColors.MAIN_TEXT_COLOR)),
                 ]),
                 trailing: const Icon(Icons.more_vert),
@@ -164,7 +178,7 @@ class _ImagePost extends State<ImagePost> {
       children: <Widget>[
         Container(
             margin: const EdgeInsets.only(left: 20.0, right: 20, bottom: 5),
-            child: Text(post.description,
+            child: Text((post.description == null) ? '' : post.description,
                 style: TextStyle(
                   color: MyColors.MAIN_TEXT_COLOR,
                   fontSize: 15,

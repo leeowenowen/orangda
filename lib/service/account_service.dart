@@ -45,18 +45,16 @@ class AccountService {
     }
   }
   //should always use this
-  static Function doIfSignIn(BuildContext context, Function doSth) {
-    return () {
-      if (currentUser() != null) {
+  static void doIfSignIn(BuildContext context, Function doSth) {
+      if (_currentUser != null) {
         doSth();
       } else {
         Navigator.of(context).pushNamed(LoginPage.ROUTE).then((user) {
-          if (currentUser() != null) {
+          if (_currentUser!= null) {
             doSth();
           }
         });
       }
-    };
   }
   // only used in login page
   static Future<void> signInWithGoogle() async {

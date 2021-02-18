@@ -15,6 +15,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "208057871960-ccv2qqoaruhlacjfl8vmqm9kkim5f4pf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orangda",
+            "certificate_hash": "cdb2e44eec4e3b402c4eb3f78582a35f45650582"
+          }
+        },
+        {
+          "client_id": "208057871960-nbk8830mvucnngp4j806406b2o3kn4mv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orangda",
+            "certificate_hash": "19491d94782fff04d743cd28a61f9de413d36cfd"
+          }
+        },
+        {
+          "client_id": "208057871960-vmc7j8pc0in56b3jbr3p4l7om26o6gb6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orangda",
+            "certificate_hash": "cd710949dd4444810fd02e3d21df790c7f4982a2"
+          }
+        },
+        {
           "client_id": "208057871960-ck1df8etml11i8meoblvgjte4itsfovf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

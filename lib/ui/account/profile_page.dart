@@ -20,8 +20,8 @@ class ProfilePage extends StatefulWidget {
 
   ProfilePage();
 
-  State createState(){
-      return _ProfilePageState();
+  State createState() {
+    return _ProfilePageState();
   }
 }
 
@@ -39,6 +39,7 @@ class _ProfilePageState extends State<ProfilePage>
   int followingCount = 0;
 
   _ProfilePageState();
+
   @override
   void initState() {
     super.initState();
@@ -60,9 +61,9 @@ class _ProfilePageState extends State<ProfilePage>
   @override
   Future<void> afterFirstLayout(BuildContext context) async {
     parseParams(context);
-    if(AccountService.currentUser() == null){
+    if (AccountService.currentUser() == null) {
       await Navigator.of(context).pushNamed(LoginPage.ROUTE);
-      if(AccountService.currentUser() != null){
+      if (AccountService.currentUser() != null) {
         setState(() {
           currentUserId = AccountService.currentUser().id;
         });
@@ -150,13 +151,12 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-
   Container buildFollowButton(
       {String text,
-        Color backgroundcolor,
-        Color textColor,
-        Color borderColor,
-        Function function}) {
+      Color backgroundcolor,
+      Color textColor,
+      Color borderColor,
+      Function function}) {
     return Container(
       padding: EdgeInsets.only(top: 2.0),
       child: FlatButton(
@@ -169,19 +169,20 @@ class _ProfilePageState extends State<ProfilePage>
             alignment: Alignment.center,
             child: Text(text,
                 style:
-                TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                    TextStyle(color: textColor, fontWeight: FontWeight.bold)),
             width: 220.0,
             height: 27.0,
           )),
     );
   }
+
   Container buildProfileFollowButton(User user) {
     // viewing your own profile - should show edit button
     if (currentUserId != null && currentUserId == profileId) {
       return buildFollowButton(
         text: "Edit Profile",
-        backgroundcolor: Colors.white,
-        textColor: Colors.black,
+        backgroundcolor: Colors.black87,
+        textColor: Colors.white70,
         borderColor: Colors.grey,
         function: editProfile,
       );
@@ -215,16 +216,25 @@ class _ProfilePageState extends State<ProfilePage>
         textColor: Colors.black,
         borderColor: Colors.grey);
   }
-  Row buildImageViewButtonBar() {
+
+  Widget buildImageViewButtonBar() {
     Color isActiveButtonColor(String viewName) {
       if (view == viewName) {
         return Colors.blueAccent;
       } else {
-        return Colors.black26;
+        return Colors.white54;
       }
     }
 
-    return Row(
+    return Container(
+        decoration: BoxDecoration(
+            border: Border(
+                top: BorderSide(
+                  color: Colors.white54,
+                )
+            )
+        ),
+        child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         IconButton(
@@ -240,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage>
           },
         ),
       ],
-    );
+    ));
   }
 
   Container buildUserPosts() {
@@ -260,17 +270,25 @@ class _ProfilePageState extends State<ProfilePage>
     }
 
     return Container(
+        decoration: BoxDecoration(
+            border: Border(
+                top: BorderSide(
+                  color: Colors.white54,
+                )
+            )
+        ),
         child: FutureBuilder<List<ImagePost>>(
-          future: getPosts(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData)
-              return Container(
-                  alignment: FractionalOffset.center,
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: CircularProgressIndicator());
-            else if (view == "grid") {
-              // build the grid
-              return GridView.count(
+      future: getPosts(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+              alignment: FractionalOffset.center,
+              padding: const EdgeInsets.only(top: 10.0),
+              child: CircularProgressIndicator());
+        } else if (view == "grid") {
+          // build the grid
+          return Container(
+              child: GridView.count(
                   crossAxisCount: 3,
                   childAspectRatio: 1.0,
 //                    padding: const EdgeInsets.all(0.5),
@@ -280,30 +298,33 @@ class _ProfilePageState extends State<ProfilePage>
                   physics: const NeverScrollableScrollPhysics(),
                   children: snapshot.data.map((ImagePost imagePost) {
                     return GridTile(child: ImageTile(imagePost));
-                  }).toList());
-            } else if (view == "feed") {
-              return Column(
+                  }).toList()));
+        } else if (view == "feed") {
+          return Container(
+              child: Column(
                   children: snapshot.data.map((ImagePost imagePost) {
-                    return imagePost;
-                  }).toList());
-            }
-            return Container();
-          },
-        ));
+                return imagePost;
+              }).toList()));
+        }
+        return Container();
+      },
+    ));
   }
-  void updateProfileId(){
+
+  void updateProfileId() {
     parseParams(context);
-    if(profileId == null || profileId.isEmpty){
-      if(AccountService.currentUser() != null){
+    if (profileId == null || profileId.isEmpty) {
+      if (AccountService.currentUser() != null) {
         profileId = AccountService.currentUser().id;
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     updateProfileId();
-    if(profileId == null || profileId.isEmpty){
+    if (profileId == null || profileId.isEmpty) {
       return Container(
           alignment: FractionalOffset.center,
           child: CircularProgressIndicator());
@@ -322,7 +343,8 @@ class _ProfilePageState extends State<ProfilePage>
 
           User user = User.fromDocument(snapshot.data);
 
-          if (currentUserId != null && user.followers.containsKey(currentUserId) &&
+          if (currentUserId != null &&
+              user.followers.containsKey(currentUserId) &&
               user.followers[currentUserId] &&
               followButtonClicked == false) {
             isFollowing = true;
@@ -375,19 +397,19 @@ class _ProfilePageState extends State<ProfilePage>
                             padding: const EdgeInsets.only(top: 15.0),
                             child: Text(
                               user.displayName,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white54),
                             )),
                         Container(
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.only(top: 1.0),
-                          child: Text(user.bio),
+                          child: Text(user.bio,
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white54),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Divider(),
                   buildImageViewButtonBar(),
-                  Divider(height: 0.0),
                   buildUserPosts(),
                 ],
               ),
@@ -422,7 +444,6 @@ class _ProfilePageState extends State<ProfilePage>
 }
 
 void openProfile(BuildContext context, String userId) {
-  Navigator.of(context).pushNamed(ProfilePage.ROUTE, arguments: {
-    "userId": userId
-  });
+  Navigator.of(context)
+      .pushNamed(ProfilePage.ROUTE, arguments: {"userId": userId});
 }

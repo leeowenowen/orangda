@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:orangda/common/utils/time_util.dart';
 
-class Post{
-  final List<String> images2;
+class Post {
+  final List<String> images;
   final String mediaUrl;
   final String username;
   final String location;
@@ -14,25 +14,39 @@ class Post{
   int likeCount;
 
   Post(
-      {this.images2,
-        this.mediaUrl,
-        this.username,
-        this.location,
-        this.description,
-        this.likes,
-        this.postId,
-        this.ownerId,
-        this.postTime}){
+      {this.images,
+      this.mediaUrl,
+      this.username,
+      this.location,
+      this.description,
+      this.likes,
+      this.postId,
+      this.ownerId,
+      this.postTime}) {
     likeCount = getLikeCount(likes);
   }
+
   factory Post.fromDocument(DocumentSnapshot document) {
     Timestamp timestamp = document['timestamp'];
     int timestampmillSeconds = timestamp.millisecondsSinceEpoch;
+    var images = document.data()['images'];
+    String mediaUrl = document.data()['mediaUrl'];
+    List<String> imgUrls = List();
+    if (images != null) {
+      List<dynamic> listImgs = images;
+      for (var i = 0; i < listImgs.length; i++) {
+        String imgUrl = listImgs[i];
+        imgUrls.add(imgUrl);
+      }
+    }
+    if (imgUrls.length > 0) {
+      mediaUrl = imgUrls[0];
+    }
     return Post(
         username: document['username'],
         location: document['location'],
-         images2: document.data()['images'],
-        mediaUrl:document.data()['mediaUrl'],
+        images: imgUrls,
+        mediaUrl: mediaUrl,
         likes: document['likes'],
         description: document['description'],
         postId: document.id,
@@ -40,23 +54,9 @@ class Post{
         postTime: formatTimestamp(timestampmillSeconds));
   }
 
-  factory Post.fromJSON(Map data) {
-    return Post(
-      username: data['username'],
-      location: data['location'],
-      images2: data['images'],
-      likes: data['likes'],
-      description: data['description'],
-      ownerId: data['ownerId'],
-      postId: data['postId'],
-      postTime: data['timestamp'],
-    );
-  }
-
-  String coverUrl(){
+  String coverUrl() {
     return mediaUrl;
   }
-
 
   int getLikeCount(var likes) {
     if (likes == null) {

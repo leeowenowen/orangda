@@ -4,7 +4,9 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:orangda/common/utils/font_util.dart';
 import 'package:orangda/models/post/post.dart';
 import 'package:orangda/models/post/post_model.dart';
+import 'package:orangda/service/account_service.dart';
 import 'package:orangda/themes/theme.dart';
+import 'package:orangda/ui/upload/upload_page.dart';
 import 'package:orangda/ui/widgets/image_post.dart';
 
 class Feed extends StatefulWidget {
@@ -19,24 +21,12 @@ class _Feed extends State<Feed> {
     super.initState();
   }
 
-  Future<List<Asset>> loadAssets() async {
-    try {
-      List<Asset> resultList = await MultiImagePicker.pickImages(
-        enableCamera:true,
-        maxImages: 3,
-      );
-      return resultList;
-    } on Exception catch (e) {
-      debugPrint(e.toString());
-    }
-    return List<Asset>();
-  }
-
   Future<void> onUpload() async {
-    // Navigator.of(context).pushNamed(UploadPage.ROUTE, arguments: {
-    //   'FilePickerResult': result
-    // });
-    List<Asset> resultList = await loadAssets();
+    AccountService.doIfSignIn(context, (){
+      Navigator.of(context)
+          .pushNamed(UploadPage.ROUTE);
+    });
+
   }
 
   @override

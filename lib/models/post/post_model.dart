@@ -9,7 +9,7 @@ class PostModel{
 
   static Stream<QuerySnapshot> getAllPost() {
     return postCollection
-        .orderBy("timestamp")
+        .orderBy("timestamp", descending:true)
         .snapshots();
   }
 

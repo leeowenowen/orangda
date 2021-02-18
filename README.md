@@ -14,3 +14,15 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## refresh .g.dart
+`flutter packages pub run build_runner build --delete-conflicting-outputs`
+
+## build release package for upload to app store console: .aab format
+`flutter build appbundle --flavor my --release`
+
+## build release apk for others: .apk formaat
+`flutter build apk --flavor my --release`
+
+flutter run --profile
+
